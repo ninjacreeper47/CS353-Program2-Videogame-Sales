@@ -7,9 +7,11 @@
   "Video Games Sales.csv")
 
 ;Precondition:   File must be a csv file, which matches the  default csv-reader specs
-;Postcondition: returns a list of lists,  where each line in the file is a list containing an element for each data attribute
+;Postcondition: returns a list of lists,  where each line in the file is a list containing an element for each data attribute.
+;Numeric values are stored as numeric types everything else is strings
 (define (load-data filename)
- (csv->list (open-input-file filename)))
+  (map list<string>->list<number/string>
+ (csv->list (open-input-file filename))))
 
 ;test function
 (define my-data-header
@@ -22,3 +24,14 @@
 ;Postcondition: returns the element of the list that matches the given attribute
 (define (find-attribute data-line header attribute)
   (list-ref data-line (index-of header attribute)))
+
+(define (list<string>->list<number/string> list)
+  (map string->number-or-string list))
+
+;Converts a string to a number if the string is numeric, otherwise returns the string back. Returns null if given null
+(define (string->number-or-string string)
+  (if (null? string)
+      null
+      (if (string->number string)
+          (string->number string)
+          string)))
