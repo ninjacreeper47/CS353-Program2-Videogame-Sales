@@ -3,7 +3,7 @@
 (require csv-reading)  ;https://docs.racket-lang.org/csv-reading/index.html
 
 
-(define (assignment-input-file)
+(define assignment-input-file
   "Video Games Sales.csv")
 
 ;Precondition:   File must be a csv file, which matches the  default csv-reader specs
@@ -101,8 +101,9 @@
 (define (publisher-match? publisher words)
 #t)
 
-(define (match? query-type data-line target header)
+;Note: This function is curried elseswhere in the code, so do not change the order of these parameters
+(define (match?  header query-type target data-line)
   ((get-match-function query-type) (find-attribute data-line header query-type) target))
 
-;(define (make-query query-type query-body data header)
- ; (filter (get-match-function query-type header )
+(define (make-query query-type query-body data header)
+  (filter (curry match? header query-type query-body) data))
