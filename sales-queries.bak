@@ -1,0 +1,6 @@
+#lang racket
+
+(require csv-reading)  ;https://docs.racket-lang.org/csv-reading/index.html
+;Precondition:   File must be a csv file, which matches racket's default csv-reader specs
+(define (load-data filename)
+  csv->lines("Video Games Sales.csv"))
