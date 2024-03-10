@@ -37,13 +37,13 @@
           string)))
 
 ;Postcondition Prompts the user for a type of query, and then calls the child function which ensures the type is valid and prompts for specific criteria
-;Returns a list containing a valid query type and additionial user input
+;Returns a query (a list containing a query type string and an additionial user input string)
 (define (prompt-query)
  (print "Enter Querry Type [Name, Date, Publisher, Region, Genre,Skip]: ")
  (prompt-for-specifics-of-query(string-titlecase  (read-line))))
 
 ;Sub function for prompt-query
-;Postcondition:  Prints a message relevant to the query type.  Then prompts the user for input,  and returns a list containing query type and user input
+;Postcondition:  Prints a message relevant to the query type.  Then prompts the user for input,  and returns a query
 ;If query type is invalid, this function will call the parent prompt-query function again. This means that the recursion will not terminate until a valid query type is entered
 (define (prompt-for-specifics-of-query query-type)
   (print (query-type->message query-type))
@@ -54,10 +54,55 @@
 (define (query-type->message query-type)
    (define message-hash
      (hash
-      "Name" "Enter Title: "
-      "Date" "Enter date-range [{year1}-{year2}]: "
+      "Game Title" "Enter Title: "
+      "Year" "Enter date-range [{year1}-{year2}]: "
       "Publisher" "Enter publisher: "
       "Region" "Enter Region [North-America,Europe,Japan,Rest of World,Global]: "
       "Genre" "Enter Genre: "
       "Skip" "Skipping search parameter. Input anything here,  it will be ignored"))
    (hash-ref message-hash query-type "INVALID QUERY TYPE!"))
+
+
+(define (get-match-function query-type)
+  (define match-function-hash
+    (hash
+     "Game Title" name-match?
+     "Year" date-match?
+     "Publisher" publisher-match?
+     "Region" region-match?
+     "Genre" genre-match?
+     "Skip" auto-match))
+    (hash-ref match-function-hash query-type))
+
+;checks equality of name 1 and name 2, ignores case
+(define (name-match? name1 name2)
+  (string-ci=? name1 name2))
+
+;checks if date is in date-range
+;TODO IMPLEMENT THIS
+(define (date-match? date-range date)
+  #t)
+
+;TODO: figure out what region matching even is lmao
+(define (region-match?  val1 val2)
+  #t)
+
+;checks equality of genre 1 and genre 2, ignores case
+(define (genre-match? genre1 genre2)
+  (string-ci=? genre1 genre2))
+
+;Always returns true regardless of parameters
+;Has 2 parameters so it can be used in filter
+(define (auto-match ignored also-ignored)
+  #t)
+
+;checks if words is a partial or full match for publisher
+;TODO IMPLEMENT THIS
+(define (publisher-match? publisher words)
+#t)
+
+(define (match? query-type data-line target header)
+  ((get-match-function query-type) (find-attribute data-line header query-type) target))
+
+;(define (make-query query-type query-body data header)
+ ; (filter (get-match-function query-type header )
