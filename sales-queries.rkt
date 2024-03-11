@@ -31,7 +31,7 @@
         (print-search (rest search)))))
 
 ;Precondition:  entries within the lists inside data must correspond to the order of entries in header
-;Postcondition: Returns a search result after prompting for a sorting style and 3 search criteria
+;Postcondition: Returns a search result after prompting for a sorting style and 3 search criteria {enter skip as a query choice to use less than 3 criteria}
 (define (new-search data header)
   (sort-by (prompt-sort-style) 
   (triple-query-fold header (prompt-query) (prompt-query) (prompt-query) data)
