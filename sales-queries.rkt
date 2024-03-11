@@ -14,21 +14,24 @@
       (user-loop (rest data) header) 
       )))
 
+;Prints the result of the last search,  then prompts the user to continue. On No, terminates the program
 (define (user-loop data header [prev-search (list "Welcome to the video game sales database")])
   (print-search prev-search)
   (println "Continue [Yes/No]: ")
   (if (string-ci=? "No" (read-line))
   (println "Goodbye!") ;Program terminates
-  (user-loop data header (new-search data header))))
+  (user-loop data header (new-search data header)))) ;Loop repeats
 
+;Prints each element in a list as a seperate line
 (define (print-search search)
   (if (empty? search)
       (println "...")
       (begin
         (println (first search))
         (print-search (rest search)))))
-  
-  
+
+;Precondition:  entries within the lists inside data must correspond to the order of entries in header
+;Postcondition: Returns a search result after prompting for a sorting style and 3 search criteria
 (define (new-search data header)
   (sort-by (prompt-sort-style) 
   (triple-query-fold header (prompt-query) (prompt-query) (prompt-query) data)
@@ -84,6 +87,7 @@
           (prompt-query)
           (list query-type (read-line))))))
 
+;Postcondition: Prompts the user for a specific region and a sales threshold.  Returns both answers as a list
 (define (prompt-for-region)
    (list
     (begin
@@ -93,6 +97,8 @@
       (println "Enter sales threshold (number in millions)")
       (read-line))))
 
+;precondition: query-type is a string
+;postcondition: Returns the corresponding message if query-type is in message-hash. Otherwise returns a failure message
 (define (query-type->message query-type)
    (define message-hash
      (hash
@@ -104,7 +110,8 @@
       "Skip" "Skipping search parameter. Input anything here,  it will be ignored"))
    (hash-ref message-hash query-type "INVALID QUERY TYPE!"))
 
-
+;precondition: query-type is a string contained in match-function-hash (case insensitive)
+;postconition: returns a function matching the query type
 (define (get-match-function query-type)
   (define match-function-hash
     (hash
@@ -149,9 +156,10 @@
 (define (publisher-match? publisher words)
 (member words (string-split publisher " ") string-ci=?))
 
-;TODO: figure out what region matching even is lmao
+;precondition:   region-val must be numeric.    Threshold must be a string
+;Post condition: returns true if region-val is at least the threshold value
 (define (region-match?  region-val threshold)
-  (> region-val (string->number threshold)))
+  (>= region-val (string->number threshold)))
 
 
 ;Precondition: takes in a header list and data-line a list where each element corresponds to an entry in the header list.
@@ -197,7 +205,6 @@
 
 ;Precondition: user must enter a valid choice.  [TODO: make this function repeat until a valid sorting style is chosen]
 ;Postcondition:  prints a message to the user, prompting them to enter a sorting style
-
 (define (prompt-sort-style)
   (println "Enter sorting style [Rank/Review/Year/North America/Europe/Japan/Rest of World/Global]")
   (read-line))
