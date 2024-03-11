@@ -7,13 +7,14 @@
   "Video Games Sales.csv")
 
 ;Precondition:   File must be a csv file, which matches the  default csv-reader specs
+
 ;Postcondition: returns a list of lists,  where each line in the file is a list containing an element for each data attribute.
 ;Numeric values are stored as numeric types everything else is strings
 (define (load-data [filename assignment-input-file])
   (map list<string>->list<number/string>
  (csv->list (open-input-file filename))))
 
-;test function
+;hard-coded values for testing
 (define my-data-header
   (list "index" "Rank" "Game Title" "Platform" "Year" "Genre" "Publisher" "North America" "Europe" "Japan" "Rest of the World" "Global" "Review"))
 (define wii-sports
@@ -70,8 +71,7 @@
      "Year" date-match?
      "Publisher" publisher-match?
      "Region" region-match?
-     "Genre" genre-match?
-     "Skip" auto-match))
+     "Genre" genre-match?))
     (hash-ref match-function-hash query-type))
 
 ;checks equality of name 1 and name 2, ignores case
@@ -93,7 +93,7 @@
 
 ;Always returns true regardless of parameters
 ;Has 2 parameters so it can be used in filter
-(define (auto-match ignored also-ignored)
+(define (auto-match)
   #t)
 
 ;checks if words is a partial or full match for publisher
@@ -101,9 +101,30 @@
 (define (publisher-match? publisher words)
 #t)
 
+;Precondition: takes in a header list and data-line a list where each element corresponds to an entry in the header list.
+; query type must be a valid query type (one of the specific strings checked for in get-match-function).
+;Target must be a string that matches the expected formating of the match function that corresponds to querry type
 ;Note: This function is curried elseswhere in the code, so do not change the order of these parameters
+;Postcondition:  Returns a boolean corresponding to whether a match for the query was found in the data-lien
 (define (match?  header query-type target data-line)
-  ((get-match-function query-type) (find-attribute data-line header query-type) target))
+  (if (equal? query-type "Skip")
+      (auto-match)
+  ((get-match-function query-type) (find-attribute data-line header query-type) target)))
 
+;Precondition:  query type must be a valid query type (one of the specific strings checked for in get-match-function).
+; Query body must be a string that matches the expected formating of the match function that corresponds to querry type
+;The data must be a list of lists where each list containtains an element   for  each corresponding  element in the header list
+
+;Postcondition: Returns a list of all lists which match the query
 (define (make-query query-type query-body data header)
-  (filter (curry match? header query-type query-body) data))
+  (filter
+   (curry match? header query-type query-body) data))
+
+;Precondition: Paramaters must satisfy the preconditions of make-querry
+;Postcondition:  Calls make-querry three times, each time using the result of the previous call as the data parameter for the next call
+(define (triple-query-fold header type1 body1 type2 body2 type3 body3 data)
+  (make-query type3 body3
+               (make-query type2 body2
+                            (make-query type1 body1 data header) header)
+               header)
+)
