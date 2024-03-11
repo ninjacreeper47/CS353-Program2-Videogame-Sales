@@ -69,17 +69,29 @@
 ;Postcondition Prompts the user for a type of query, and then calls the child function which ensures the type is valid and prompts for specific criteria
 ;Returns a query (a list containing a query type string and an additionial user input string)
 (define (prompt-query)
- (print "Enter Querry Type [Game Title,Year,Publisher,Region,Genre,Skip]: ")
+ (println "Enter Querry Type [Game Title,Year,Publisher,Region,Genre,Skip]: ")
  (prompt-for-specifics-of-query(string-titlecase  (read-line))))
 
 ;Sub function for prompt-query
 ;Postcondition:  Prints a message relevant to the query type.  Then prompts the user for input,  and returns a query
 ;If query type is invalid, this function will call the parent prompt-query function again. This means that the recursion will not terminate until a valid query type is entered
 (define (prompt-for-specifics-of-query query-type)
-  (println (query-type->message query-type))
-  (if (equal? (query-type->message query-type) "INVALID QUERY TYPE!")
-      (prompt-query)
-      (list query-type (read-line))))
+  (if (string-ci=? query-type "Region")
+      (prompt-for-region)
+      (begin
+      (println (query-type->message query-type))
+      (if (string-ci=? (query-type->message query-type) "INVALID QUERY TYPE!")
+          (prompt-query)
+          (list query-type (read-line))))))
+
+(define (prompt-for-region)
+   (list
+    (begin
+      (println "Enter Region [North America/Europe/Japan/Rest of World/Global]")
+      (read-line))
+    (begin
+      (println "Enter sales threshold (number in millions)")
+      (read-line))))
 
 (define (query-type->message query-type)
    (define message-hash
@@ -99,9 +111,13 @@
      "Game Title" name-match?
      "Year" date-match?
      "Publisher" publisher-match?
-     "Region" region-match?
+     "North America" region-match?
+     "Europe" region-match?
+     "Japan" region-match?
+     "Rest of World" region-match?
+     "Global" region-match?
      "Genre" genre-match?))
-    (hash-ref match-function-hash query-type))
+    (hash-ref match-function-hash (string-titlecase query-type)))
 
 ;checks equality of name 1 and name 2, ignores case
 (define (name-match? name1 name2)
@@ -110,18 +126,14 @@
 
 ;Precondition:  date-range must be a string of the format "[year1]-[year2]"
 ;date must be a number
-;Postcondition: returns true if date is containted in the range, false otherwise
+;Postcondition: returns true if date is containted in the range (inclusive), false otherwise
 
 (define (date-match? date date-range-input)
    (let ([date-range (sort (map string->number (string-split date-range-input "-")) <)])
-     (if (and (> date (first date-range)) (< date (second date-range)))
+     (if (and (>= date (first date-range)) (<= date (second date-range)))
          #t
          #f
 )))
-
-;TODO: figure out what region matching even is lmao
-(define (region-match?  region-val threshold)
-  #t)
 
 ;checks equality of genre 1 and genre 2, ignores case
 (define (genre-match? genre1 genre2)
@@ -136,6 +148,11 @@
 ;Postcondition: returns a match if words matches any word in publisher. Otherwise returns false
 (define (publisher-match? publisher words)
 (member words (string-split publisher " ") string-ci=?))
+
+;TODO: figure out what region matching even is lmao
+(define (region-match?  region-val threshold)
+  (> region-val (string->number threshold)))
+
 
 ;Precondition: takes in a header list and data-line a list where each element corresponds to an entry in the header list.
 ; query type must be a valid query type (one of the specific strings checked for in get-match-function).
