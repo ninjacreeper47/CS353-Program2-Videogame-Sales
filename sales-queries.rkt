@@ -120,7 +120,7 @@
 )))
 
 ;TODO: figure out what region matching even is lmao
-(define (region-match?  val1 val2)
+(define (region-match?  region-val threshold)
   #t)
 
 ;checks equality of genre 1 and genre 2, ignores case
@@ -132,10 +132,10 @@
 (define (auto-match)
   #t)
 
-;checks if words is a partial or full match for publisher
-;TODO IMPLEMENT THIS
+;Precondition: Seperate words in publisher name are seperated by spaces
+;Postcondition: returns a match if words matches any word in publisher. Otherwise returns false
 (define (publisher-match? publisher words)
-#t)
+(member words (string-split publisher " ") string-ci=?))
 
 ;Precondition: takes in a header list and data-line a list where each element corresponds to an entry in the header list.
 ; query type must be a valid query type (one of the specific strings checked for in get-match-function).
