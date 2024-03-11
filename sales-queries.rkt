@@ -6,6 +6,32 @@
 (define assignment-input-file
   "Video Games Sales.csv")
 
+;Main function of program. RUN THIS
+;Loads data and starts user query loop
+(define (run [filename assignment-input-file])
+  (let ([data (load-data filename)])
+    (let ([header (first data)])
+      (user-loop (rest data) header) 
+      )))
+
+(define (user-loop data header [prev-search (list "Welcome to the video game sales database")])
+  (print-search prev-search)
+  (println "Continue [Yes/No]: ")
+  (if (string-ci=? "No" (read-line))
+  (println "Goodbye!") ;Program terminates
+  (user-loop data header (new-search data header))))
+
+(define (print-search search)
+  (if (empty? search)
+      (println "...")
+      (begin
+        (println (first search))
+        (print-search (rest search)))))
+  
+  
+(define (new-search data header)
+  (triple-query-fold header (prompt-query) (prompt-query) (prompt-query) data))
+ 
 ;Precondition:   File must be a csv file, which matches the  default csv-reader specs
 
 ;Postcondition: returns a list of lists,  where each line in the file is a list containing an element for each data attribute.
@@ -40,14 +66,14 @@
 ;Postcondition Prompts the user for a type of query, and then calls the child function which ensures the type is valid and prompts for specific criteria
 ;Returns a query (a list containing a query type string and an additionial user input string)
 (define (prompt-query)
- (print "Enter Querry Type [Name, Date, Publisher, Region, Genre,Skip]: ")
+ (print "Enter Querry Type [Game Title, Year, Publisher, Region, Genre,Skip]: ")
  (prompt-for-specifics-of-query(string-titlecase  (read-line))))
 
 ;Sub function for prompt-query
 ;Postcondition:  Prints a message relevant to the query type.  Then prompts the user for input,  and returns a query
 ;If query type is invalid, this function will call the parent prompt-query function again. This means that the recursion will not terminate until a valid query type is entered
 (define (prompt-for-specifics-of-query query-type)
-  (print (query-type->message query-type))
+  (println (query-type->message query-type))
   (if (equal? (query-type->message query-type) "INVALID QUERY TYPE!")
       (prompt-query)
       (list query-type (read-line))))
@@ -120,11 +146,11 @@
   (filter
    (curry match? header query-type query-body) data))
 
-;Precondition: Paramaters must satisfy the preconditions of make-querry
+;Precondition: Each query paramater must be a list containing a type and body.  These types an bodies must follow the preconditions of make-query
 ;Postcondition:  Calls make-querry three times, each time using the result of the previous call as the data parameter for the next call
-(define (triple-query-fold header type1 body1 type2 body2 type3 body3 data)
-  (make-query type3 body3
-               (make-query type2 body2
-                            (make-query type1 body1 data header) header)
+(define (triple-query-fold header query1 query2 query3 data)
+  (make-query (first query3) (second query3)
+               (make-query (first query2) (second query2)
+                            (make-query (first query1) (second query1) data header) header)
                header)
 )
