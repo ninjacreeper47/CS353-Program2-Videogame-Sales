@@ -154,3 +154,13 @@
                             (make-query (first query1) (second query1) data header) header)
                header)
 )
+
+;Precondition:   attribute must exist in header and each list in data should have a valid entry in the corresponding spot. {same position where attribute exists in header}
+;Attribute must be numerical
+;Postcondition: returns data, ordered by attribute (descending)
+(define (sort-by attribute data header)
+  (sort data (make-search-comparison-function attribute header)))
+
+(define (make-search-comparison-function attribute header)
+  (lambda (line1 line2)
+      (< (find-attribute line1 header attribute) (find-attribute line2 header attribute))))
