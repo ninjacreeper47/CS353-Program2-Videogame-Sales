@@ -30,7 +30,10 @@
   
   
 (define (new-search data header)
-  (triple-query-fold header (prompt-query) (prompt-query) (prompt-query) data))
+  (sort-by (prompt-sort-style) 
+  (triple-query-fold header (prompt-query) (prompt-query) (prompt-query) data)
+  header))
+  
  
 ;Precondition:   File must be a csv file, which matches the  default csv-reader specs
 
@@ -66,7 +69,7 @@
 ;Postcondition Prompts the user for a type of query, and then calls the child function which ensures the type is valid and prompts for specific criteria
 ;Returns a query (a list containing a query type string and an additionial user input string)
 (define (prompt-query)
- (print "Enter Querry Type [Game Title, Year, Publisher, Region, Genre,Skip]: ")
+ (print "Enter Querry Type [Game Title,Year,Publisher,Region,Genre,Skip]: ")
  (prompt-for-specifics-of-query(string-titlecase  (read-line))))
 
 ;Sub function for prompt-query
@@ -157,10 +160,20 @@
 
 ;Precondition:   attribute must exist in header and each list in data should have a valid entry in the corresponding spot. {same position where attribute exists in header}
 ;Attribute must be numerical
-;Postcondition: returns data, ordered by attribute (descending)
+;Postcondition: returns data, ordered by attribute (ascending)
 (define (sort-by attribute data header)
   (sort data (make-search-comparison-function attribute header)))
 
+;Precondition:  attribute must exist in header
+;Postcondition: Returns a < function which compares two datalines by attribute.
+;(The datalines must have their entries correspond to the entries in header)
 (define (make-search-comparison-function attribute header)
   (lambda (line1 line2)
       (< (find-attribute line1 header attribute) (find-attribute line2 header attribute))))
+
+;Precondition: user must enter a valid choice.  [TODO: make this function repeat until a valid sorting style is chosen]
+;Postcondition:  prints a message to the user, prompting them to enter a sorting style
+
+(define (prompt-sort-style)
+  (println "Enter sorting style [Rank/Review/Year/North America/Europe/Japan/Rest of World/Global]")
+  (read-line))
