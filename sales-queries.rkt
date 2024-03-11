@@ -107,10 +107,17 @@
 (define (name-match? name1 name2)
   (string-ci=? name1 name2))
 
-;checks if date is in date-range
-;TODO IMPLEMENT THIS
-(define (date-match? date-range date)
-  #t)
+
+;Precondition:  date-range must be a string of the format "[year1]-[year2]"
+;date must be a number
+;Postcondition: returns true if date is containted in the range, false otherwise
+
+(define (date-match? date date-range-input)
+   (let ([date-range (sort (map string->number (string-split date-range-input "-")) <)])
+     (if (and (> date (first date-range)) (< date (second date-range)))
+         #t
+         #f
+)))
 
 ;TODO: figure out what region matching even is lmao
 (define (region-match?  val1 val2)
